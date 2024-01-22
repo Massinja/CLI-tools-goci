@@ -22,7 +22,7 @@ For this example, CI pipeline consists of:
 // out - interface to output the status of the tool
 func run(proj string, out io.Writer) error {
 	if proj == "" {
-		return fmt.Errorf("Project directory is missing")
+		return fmt.Errorf("Project directory is required: %w", ErrValidation)
 	}
 
 	// go build doesn't create an exec file
@@ -33,14 +33,15 @@ func run(proj string, out io.Writer) error {
 	cmd := exec.Command("go", args...)
 	cmd.Dir = proj
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("'go build' failed: %s", err)
+		return &stepErr{step: "go build", msg: "go build failed", cause: err}
 	}
 	_, err := fmt.Fprintln(out, "Go Build: SUCCESS")
 	return err
 
 }
 
-func main(){
+func main() {
+	fmt.Println("Hi from the main!")
 	proj := flag.String("p", "", "Project directory")
 	flag.Parse()
 	if err := run(*proj, os.Stdout); err != nil {
