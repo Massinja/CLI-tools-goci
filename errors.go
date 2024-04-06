@@ -5,28 +5,27 @@ import (
 	"fmt"
 )
 
-var (
-	ErrValidation = errors.New("Validation failed")
-)
+var ErrValidation = errors.New("validation failed")
 
-type stepErr struct {
+type stepError struct {
 	step  string
 	msg   string
 	cause error
 }
 
-func (s *stepErr) Error() string {
-	return fmt.Sprintf("Step: %q: %s: Cause: %v", s.step, s.msg, s.cause)
+func (s *stepError) Error() string {
+	return fmt.Sprintf("step: %q: %s: cause: %v", s.step, s.msg, s.cause)
 }
 
-func (s *stepErr) Is(target error) bool {
-	t, ok := target.(*stepErr)
+func (s *stepError) Is(target error) bool {
+	t, ok := target.(*stepError)
 	if !ok {
 		return false
 	}
+
 	return t.step == s.step
 }
 
-func (s *stepErr) Unwrap() error {
+func (s *stepError) Unwrap() error {
 	return s.cause
 }
