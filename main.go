@@ -14,6 +14,10 @@ import (
 // - executing gofmt to ensure the program's format conforms to the standards;
 // - executing git push to push the code to the remote shared Git repo.
 
+type executer interface {
+	execute() (string, error)
+}
+
 // func run takes two input params:
 // proj - go project directory on which to execute the CI pipeline steps;
 // out - interface to output the status of the tool.
@@ -22,14 +26,18 @@ func run(proj string, out io.Writer) error {
 		return fmt.Errorf("project directory is required: %w", ErrValidation)
 	}
 
-	pipeline := make([]step, 2)
-	pipeline[0] = newStep(
+	pipeline := make([]executer, 3)
+
+	// builds the program to verify the structure is valid
+	pipeline[0] = newExceptionStep(
 		"go build",
 		"go",
 		"Go Build: SUCCESS",
 		proj,
 		[]string{"build", ".", "errors"},
 	)
+
+	// tests with "go test -v"
 	pipeline[1] = newStep(
 		"go test",
 		"go",
@@ -37,6 +45,17 @@ func run(proj string, out io.Writer) error {
 		proj,
 		[]string{"test", "-v"},
 	)
+
+	// validates whether the project conforms to the Go code fotmatting standards
+	// "gofmt -l" - lists files whose formatting differs from gofmt's
+	pipeline[2] = newExceptionStep(
+		"go fmt",
+		"gofmt",
+		"Gofmt: SUCCESS",
+		proj,
+		[]string{"-l", "."},
+	)
+
 	for _, s := range pipeline {
 		msg, err := s.execute()
 		if err != nil {
