@@ -18,7 +18,7 @@ func (s step) execute() (string, error) {
 	if err := cmd.Run(); err != nil {
 		return "", &stepError{
 			step:  s.name,
-			msg:   "failed to execute",
+			msg:   "failed to execute\n",
 			cause: err,
 		}
 	}
