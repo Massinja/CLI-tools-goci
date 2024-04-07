@@ -1,6 +1,8 @@
 package main
 
-import "os/exec"
+import (
+	"os/exec"
+)
 
 // A pipeline step.
 type step struct {

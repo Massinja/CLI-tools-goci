@@ -59,15 +59,16 @@ func run(proj string, out io.Writer) error {
 	for _, s := range pipeline {
 		msg, err := s.execute()
 		if err != nil {
-			return err
+			return err //nolint:wrapcheck
 		}
+
 		_, err = fmt.Fprintln(out, msg)
 		if err != nil {
-			return err
+			return err //nolint:wrapcheck
 		}
 	}
 
-	return nil //nolint:wrapcheck
+	return nil
 }
 
 func main() {
@@ -78,7 +79,7 @@ func main() {
 	flag.Parse()
 
 	if err := run(*proj, os.Stdout); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}
 }
