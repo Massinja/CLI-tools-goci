@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"os/exec"
@@ -35,18 +36,22 @@ func (s timeoutStep) execute() (string, error) {
 	cmd := exec.CommandContext(ctx, s.exe, s.args...)
 	cmd.Dir = s.proj
 
+	var out bytes.Buffer
+	cmd.Stderr = &out
+	cmd.Stdin = &out
+
 	if err := cmd.Run(); err != nil {
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			return "", &stepError{
 				step:  s.name,
-				msg:   "failed time out",
+				msg:   "failed time out " + out.String(),
 				cause: context.DeadlineExceeded,
 			}
 		}
 
 		return "", &stepError{
 			step:  s.name,
-			msg:   "failed to execute",
+			msg:   "failed to execute " + out.String(),
 			cause: err,
 		}
 	}
