@@ -62,7 +62,7 @@ func run(proj string, out io.Writer) error {
 		"git",
 		"Git Push: SUCCESS",
 		proj,
-		[]string{"push", "origin", "main"},
+		[]string{"push", "origin", "master"},
 		10*time.Second,
 	)
 
