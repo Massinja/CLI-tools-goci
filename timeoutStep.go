@@ -44,14 +44,14 @@ func (s timeoutStep) execute() (string, error) {
 		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 			return "", &stepError{
 				step:  s.name,
-				msg:   "failed time out " + out.String(),
+				msg:   "failed time out: " + out.String(),
 				cause: context.DeadlineExceeded,
 			}
 		}
 
 		return "", &stepError{
 			step:  s.name,
-			msg:   "failed to execute " + out.String(),
+			msg:   "failed to execute: " + out.String(),
 			cause: err,
 		}
 	}

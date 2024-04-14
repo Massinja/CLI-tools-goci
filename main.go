@@ -33,7 +33,7 @@ func run(proj string, out io.Writer) error {
 	pipeline[0] = newExceptionStep(
 		"go build",
 		"go",
-		"Go Build: SUCCESS",
+		"Go Build: SUCCESS\n",
 		proj,
 		[]string{"build", ".", "errors"},
 	)
@@ -42,7 +42,7 @@ func run(proj string, out io.Writer) error {
 	pipeline[1] = newStep(
 		"go test",
 		"go",
-		"Go Test: SUCCESS",
+		"Go Test: SUCCESS\n",
 		proj,
 		[]string{"test", "-v"},
 	)
@@ -52,7 +52,7 @@ func run(proj string, out io.Writer) error {
 	pipeline[2] = newExceptionStep(
 		"go fmt",
 		"gofmt",
-		"Gofmt: SUCCESS",
+		"Gofmt: SUCCESS\n",
 		proj,
 		[]string{"-l", "."},
 	)
@@ -60,7 +60,7 @@ func run(proj string, out io.Writer) error {
 	pipeline[3] = newTimeoutStep(
 		"git push",
 		"git",
-		"Git Push: SUCCESS",
+		"Git Push: SUCCESS\n",
 		proj,
 		[]string{"push", "origin", "master"},
 		10*time.Second,
@@ -72,7 +72,7 @@ func run(proj string, out io.Writer) error {
 			return err //nolint:wrapcheck
 		}
 
-		_, err = fmt.Fprintln(out, msg)
+		_, err = fmt.Fprint(out, msg)
 		if err != nil {
 			return err //nolint:wrapcheck
 		}
@@ -89,7 +89,7 @@ func main() {
 	flag.Parse()
 
 	if err := run(*proj, os.Stdout); err != nil {
-		fmt.Fprint(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

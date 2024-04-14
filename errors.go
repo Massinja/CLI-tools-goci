@@ -18,7 +18,7 @@ func (s *stepError) Error() string {
 		return "STEP: " + s.step + ": " + s.msg
 	}
 
-	return fmt.Sprintf("STEP: %s: %s%v\n", s.step, s.msg, s.cause)
+	return fmt.Sprintf("STEP: %s: %s%v", s.step, s.msg, s.cause)
 }
 
 func (s *stepError) Is(target error) bool {
