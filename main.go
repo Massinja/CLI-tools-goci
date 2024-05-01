@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -66,19 +68,46 @@ func run(proj string, out io.Writer) error {
 		10*time.Second,
 	)
 
-	for _, s := range pipeline {
-		msg, err := s.execute()
-		if err != nil {
-			return err //nolint:wrapcheck
+	// sig - a buffered channel of size one which
+	// allows the app to handle at least one signal correctly
+	sig := make(chan os.Signal, 1)
+
+	errCh := make(chan error)
+	done := make(chan error)
+
+	// relay SIGINT and SIGTERM to channel sig
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+
+	// to allow concurrent execution with signal.Notify
+	go func() {
+		for _, s := range pipeline {
+			msg, err := s.execute()
+			if err != nil {
+				errCh <- err
+				return
+			}
+
+			_, err = fmt.Fprintln(out, msg)
+			if err != nil {
+				errCh <- err
+				return
+			}
 		}
 
-		_, err = fmt.Fprint(out, msg)
-		if err != nil {
-			return err //nolint:wrapcheck
+		close(done)
+	}()
+
+	for {
+		select {
+		case rec := <-sig:
+			signal.Stop(sig)
+			return fmt.Errorf("%s: exiting: %w", rec, ErrSignal)
+		case err := <-errCh:
+			return err
+		case <-done:
+			return nil
 		}
 	}
-
-	return nil
 }
 
 func main() {
