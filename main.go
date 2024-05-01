@@ -32,10 +32,10 @@ func run(proj string, out io.Writer) error {
 	pipeline := make([]executer, 4)
 
 	// builds the program to verify the structure is valid
-	pipeline[0] = newExceptionStep(
+	pipeline[0] = newStep(
 		"go build",
 		"go",
-		"Go Build: SUCCESS\n",
+		"Go Build: SUCCESS",
 		proj,
 		[]string{"build", ".", "errors"},
 	)
@@ -44,17 +44,17 @@ func run(proj string, out io.Writer) error {
 	pipeline[1] = newStep(
 		"go test",
 		"go",
-		"Go Test: SUCCESS\n",
+		"Go Test: SUCCESS",
 		proj,
 		[]string{"test", "-v"},
 	)
 
 	// validates whether the project conforms to the Go code fotmatting standards
 	// "gofmt -l" - lists files whose formatting differs from gofmt's
-	pipeline[2] = newExceptionStep(
+	pipeline[2] = newStep(
 		"go fmt",
 		"gofmt",
-		"Gofmt: SUCCESS\n",
+		"Gofmt: SUCCESS",
 		proj,
 		[]string{"-l", "."},
 	)
@@ -62,7 +62,7 @@ func run(proj string, out io.Writer) error {
 	pipeline[3] = newTimeoutStep(
 		"git push",
 		"git",
-		"Git Push: SUCCESS\n",
+		"Git Push: SUCCESS",
 		proj,
 		[]string{"push", "origin", "master"},
 		10*time.Second,
