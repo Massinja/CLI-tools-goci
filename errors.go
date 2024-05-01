@@ -5,7 +5,12 @@ import (
 	"fmt"
 )
 
-var ErrValidation = errors.New("validation failed")
+var (
+	ErrValidation = errors.New("validation failed")
+
+	// to handle errors outside of CI step.
+	ErrSignal = errors.New("received interrupt signal")
+)
 
 type stepError struct {
 	step  string
